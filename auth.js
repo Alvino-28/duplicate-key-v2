@@ -1,6 +1,6 @@
 (() => {
   const SESSION_KEY = 'keydup_admin_logged_in';
-  const DEFAULT_LOGIN = { username: 'admin', password: 'admin123' };
+  const DEFAULT_LOGIN = { username: 'kuncis', password: 'kuncis123' };
   const DASHBOARD_PAGE = 'index.html';
 
   const qs = (selector) => document.querySelector(selector);
