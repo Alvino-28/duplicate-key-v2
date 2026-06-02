@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KeyDup Inventory Pro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">🗝️</div>
+        <div>
+          <h1>KeyDup Inventory Pro</h1>
+          <p>Sistem inventory untuk usaha duplikat kunci</p>
+        </div>
+      </div>
+
+      <nav class="nav" id="navMenu">
+        <button class="nav-btn active" data-section="home">
+          <span class="nav-icon">🏠</span>
+          <span>Home</span>
+        </button>
+        <button class="nav-btn" data-section="items">
+          <span class="nav-icon">🧩</span>
+          <span>Items</span>
+        </button>
+        <button class="nav-btn" data-section="inventory">
+          <span class="nav-icon">📦</span>
+          <span>Inventory</span>
+        </button>
+        <button class="nav-btn" data-section="sales">
+          <span class="nav-icon">💳</span>
+          <span>Sales</span>
+        </button>
+        <button class="nav-btn" data-section="purchases">
+          <span class="nav-icon">🛒</span>
+          <span>Purchases</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <strong>Fitur inti:</strong><br>
+        Login admin, kategori manual, CRUD item, stok masuk/keluar, penjualan, pembelian, export Excel/PDF, backup, dan restore data.
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn no-print" id="menuToggle" title="Buka menu">☰</button>
+          <div class="page-title">
+            <h2 id="pageTitle">Home</h2>
+            <p id="pageSubtitle">Ringkasan performa stok, penjualan, dan aktivitas terbaru.</p>
+          </div>
+        </div>
+        <div class="topbar-right no-print">          <button class="btn secondary" id="backupDataBtn">Backup Data</button>
+          <button class="btn secondary" id="restoreBackupBtn">Restore Backup</button>          <button class="btn danger" id="logoutBtn">Logout</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="section active" id="section-home">
+          <div class="hero-banner">
+            <div style="position:relative;z-index:1">
+              <span class="badge info" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.18)">Dashboard Modern & Responsif</span>
+              <h3>Kelola stok blank kunci, silinder, remote shell, dan hardware dengan cepat.</h3>
+              <p>Semua data tersimpan di browser menggunakan localStorage. Cocok untuk operasional harian usaha duplikat kunci tanpa perlu framework atau instalasi tambahan.</p>
+              <div class="hero-actions no-print">
+                <button class="btn secondary" data-open-section="items">Kelola Items</button>
+                <button class="btn secondary" data-open-section="inventory">Update Stok</button>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div class="hero-metrics">
+                <div class="metric-box">
+                  <div class="label">Kategori</div>
+                  <div class="value" id="heroCategoryCount">0</div>
+                </div>
+                <div class="metric-box">
+                  <div class="label">Low Stock</div>
+                  <div class="value" id="heroLowStockCount">0</div>
+                </div>
+                <div class="metric-box">
+                  <div class="label">Transaksi Sales</div>
+                  <div class="value" id="heroSalesCount">0</div>
+                </div>
+                <div class="metric-box">
+                  <div class="label">Transaksi Purchase</div>
+                  <div class="value" id="heroPurchaseCount">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid stats-grid">
+            <div class="card stat-card">
+              <div class="stat-head">
+                <div>
+                  <div class="stat-title">Total Item</div>
+                  <div class="stat-value" id="homeTotalItems">0</div>
+                </div>
+                <span class="badge info">Items</span>
+              </div>
+              <div class="kpi-note">Jumlah SKU/item aktif yang terdaftar.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-head">
+                <div>
+                  <div class="stat-title">Total Stok</div>
+                  <div class="stat-value" id="homeTotalStock">0</div>
+                </div>
+                <span class="badge success">Stock</span>
+              </div>
+              <div class="kpi-note">Akumulasi stok tersedia saat ini.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-head">
+                <div>
+                  <div class="stat-title">Nilai Inventory</div>
+                  <div class="stat-value" id="homeInventoryValue">Rp 0</div>
+                </div>
+                <span class="badge warning">Modal</span>
+              </div>
+              <div class="kpi-note">Perhitungan stok × harga modal.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-head">
+                <div>
+                  <div class="stat-title">Total Penjualan</div>
+                  <div class="stat-value" id="homeTotalSalesValue">Rp 0</div>
+                </div>
+                <span class="badge danger">Revenue</span>
+              </div>
+              <div class="kpi-note">Akumulasi nominal dari seluruh transaksi sales.</div>
+            </div>
+          </div>
+
+          <div class="two-col section-gap">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Stok Menipis</h3>
+                  <p>Item yang stoknya sudah menyentuh atau di bawah stok minimum.</p>
+                </div>
+              </div>
+              <div id="lowStockList"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Aktivitas Terbaru</h3>
+                  <p>Riwayat stok masuk, stok keluar, sales, dan purchases terbaru.</p>
+                </div>
+              </div>
+              <div id="recentActivityList"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="section-items">
+          <div class="section-headline">
+            <div>
+              <h2 style="margin:0 0 6px">Items & Kategori</h2>
+              <div class="muted">Kelola kategori manual dan data item utama.</div>
+            </div>
+            <div class="split-actions no-print">
+              <button class="btn success" id="exportItemsExcelBtn">Export Items Excel</button>
+              <button class="btn secondary" id="exportItemsPdfBtn">Export Items PDF</button>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Kelola Kategori</h3>
+                  <p>Data kategori default kosong. Tambahkan kategori manual sesuai kebutuhan usaha Anda.</p>
+                </div>
+              </div>
+              <form id="categoryForm">
+                <input type="hidden" id="categoryEditId" />
+                <div class="field">
+                  <label for="categoryName">Nama Kategori</label>
+                  <input class="input" id="categoryName" placeholder="Contoh: Kunci Rumah" />
+                </div>
+                <div class="form-actions no-print">
+                  <button class="btn primary" type="submit" id="saveCategoryBtn">Simpan Kategori</button>
+                  <button class="btn secondary" type="button" id="cancelCategoryEditBtn">Batal Edit</button>
+                </div>
+              </form>
+              <div class="table-wrap section-gap">
+                <table id="categoryTable">
+                  <thead>
+                    <tr>
+                      <th>Kategori</th>
+                      <th>Jumlah Item</th>
+                      <th class="no-print">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="categoryTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Form Item</h3>
+                  <p>Item tidak bisa disimpan jika kategori belum dibuat atau belum dipilih.</p>
+                </div>
+              </div>
+              <form id="itemForm">
+                <input type="hidden" id="itemEditId" />
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="itemCode">ID Item</label>
+                    <input class="input" id="itemCode" placeholder="Contoh: IK-001" />
+                  </div>
+                  <div class="field">
+                    <label for="itemName">Nama Item</label>
+                    <input class="input" id="itemName" placeholder="Nama item" />
+                  </div>
+                  <div class="field">
+                    <label for="itemCategory">Kategori</label>
+                    <select class="select" id="itemCategory"></select>
+                  </div>
+                  <div class="field">
+                    <label for="itemSubCategory">Sub Kategori</label>
+                    <input class="input" id="itemSubCategory" placeholder="Contoh: Brass / Yamaha / Silinder" />
+                  </div>
+                  <div class="field">
+                    <label for="itemType">Tipe</label>
+                    <input class="input" id="itemType" placeholder="Contoh: Laser / Single Sided" />
+                  </div>
+                  <div class="field">
+                    <label for="itemInitialStock">Stok Awal</label>
+                    <input class="input" id="itemInitialStock" type="number" min="0" placeholder="0" />
+                  </div>
+                  <div class="field">
+                    <label for="itemMinStock">Stok Minimum</label>
+                    <input class="input" id="itemMinStock" type="number" min="0" placeholder="0" />
+                  </div>
+                  <div class="field">
+                    <label for="itemCostPrice">Harga Modal</label>
+                    <input class="input" id="itemCostPrice" type="number" min="0" placeholder="0" />
+                  </div>
+                  <div class="field">
+                    <label for="itemSellPrice">Harga Jual</label>
+                    <input class="input" id="itemSellPrice" type="number" min="0" placeholder="0" />
+                  </div>
+                </div>
+                <div class="form-actions no-print">
+                  <button class="btn primary" type="submit" id="saveItemBtn">Simpan Item</button>
+                  <button class="btn secondary" type="button" id="cancelItemEditBtn">Batal Edit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card section-gap">
+            <div class="card-header">
+              <div class="card-title">
+                <h3>Data Item</h3>
+                <p>Cari berdasarkan ID, nama, kategori, sub kategori, atau tipe.</p>
+              </div>
+            </div>
+            <div class="search-panel">
+              <input class="input" id="itemSearch" placeholder="Cari ID / nama / kategori / sub kategori / tipe..." />
+              <select class="select" id="itemCategoryFilter"></select>
+              <select class="select" id="itemSubCategoryFilter"></select>
+            </div>
+            <div class="table-wrap">
+              <table id="itemsTable">
+                <thead>
+                  <tr>
+                    <th>ID Item</th>
+                    <th>Nama</th>
+                    <th>Kategori</th>
+                    <th>Sub Kategori</th>
+                    <th>Tipe</th>
+                    <th>Stok</th>
+                    <th>Min</th>
+                    <th>Harga Modal</th>
+                    <th>Harga Jual</th>
+                    <th class="no-print">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="itemsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="section-inventory">
+          <div class="section-headline">
+            <div>
+              <h2 style="margin:0 0 6px">Inventory</h2>
+              <div class="muted">Kelola stok masuk dan stok keluar dengan update otomatis ke item.</div>
+            </div>
+            <div class="split-actions no-print">
+              <button class="btn success" id="exportInventoryExcelBtn">Export Inventory Excel</button>
+              <button class="btn secondary" id="exportInventoryPdfBtn">Export Inventory PDF</button>
+            </div>
+          </div>
+
+          <div class="grid summary-grid">
+            <div class="card stat-card">
+              <div class="stat-title">Total Movement</div>
+              <div class="stat-value" id="inventoryTotalMovement">0</div>
+              <div class="kpi-note">Jumlah transaksi movement tersimpan.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Total Stok Masuk</div>
+              <div class="stat-value" id="inventoryTotalIn">0</div>
+              <div class="kpi-note">Akumulasi qty pergerakan IN.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Total Stok Keluar</div>
+              <div class="stat-value" id="inventoryTotalOut">0</div>
+              <div class="kpi-note">Akumulasi qty pergerakan OUT.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Net Movement</div>
+              <div class="stat-value" id="inventoryNetMovement">0</div>
+              <div class="kpi-note">Selisih qty masuk dikurangi qty keluar.</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Form Stok Masuk / Keluar</h3>
+                  <p>Jika stok keluar melebihi stok tersedia, sistem akan menolak transaksi.</p>
+                </div>
+              </div>
+              <form id="inventoryForm">
+                <input type="hidden" id="inventoryEditId" />
+                <div class="field">
+                  <label for="inventoryItem">Pilih Item</label>
+                  <select class="select" id="inventoryItem"></select>
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="inventoryType">Jenis Pergerakan</label>
+                    <select class="select" id="inventoryType">
+                      <option value="IN">IN</option>
+                      <option value="OUT">OUT</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="inventoryQty">Jumlah</label>
+                    <input class="input" id="inventoryQty" type="number" min="1" placeholder="0" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="inventoryNote">Keterangan</label>
+                  <textarea class="textarea" id="inventoryNote" placeholder="Catatan movement, misal stok opname, barang rusak, stok supplier masuk, dll."></textarea>
+                </div>
+                <div class="form-actions no-print">
+                  <button class="btn primary" type="submit" id="saveInventoryBtn">Simpan Movement</button>
+                  <button class="btn secondary" type="button" id="cancelInventoryEditBtn">Batal Edit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Ringkasan Inventory</h3>
+                  <p>Ikhtisar cepat per item dan health stok saat ini.</p>
+                </div>
+              </div>
+              <div id="inventorySummaryList"></div>
+            </div>
+          </div>
+
+          <div class="card section-gap">
+            <div class="card-header">
+              <div class="card-title">
+                <h3>Riwayat Inventory</h3>
+                <p>Semua stok masuk/keluar, termasuk transaksi yang dihasilkan dari sales dan purchases.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="inventoryTable">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Item</th>
+                    <th>Jenis</th>
+                    <th>Jumlah</th>
+                    <th>Sumber</th>
+                    <th>Keterangan</th>
+                    <th class="no-print">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="section-sales">
+          <div class="section-headline">
+            <div>
+              <h2 style="margin:0 0 6px">Sales</h2>
+              <div class="muted">Simpan transaksi penjualan dan kurangi stok otomatis.</div>
+            </div>
+            <div class="split-actions no-print">
+              <button class="btn success" id="exportSalesExcelBtn">Export Sales Excel</button>
+              <button class="btn secondary" id="exportSalesPdfBtn">Export Sales PDF</button>
+            </div>
+          </div>
+
+          <div class="grid summary-grid">
+            <div class="card stat-card">
+              <div class="stat-title">Total Transaksi</div>
+              <div class="stat-value" id="salesTotalTransactions">0</div>
+              <div class="kpi-note">Jumlah seluruh transaksi sales.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Total Revenue</div>
+              <div class="stat-value" id="salesTotalRevenue">Rp 0</div>
+              <div class="kpi-note">Total nominal penjualan.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Transaksi Selesai</div>
+              <div class="stat-value" id="salesDoneCount">0</div>
+              <div class="kpi-note">Status selesai.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Transaksi Pending</div>
+              <div class="stat-value" id="salesPendingCount">0</div>
+              <div class="kpi-note">Status pending.</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Form Penjualan</h3>
+                  <p>Stok item akan otomatis berkurang saat transaksi berhasil disimpan.</p>
+                </div>
+              </div>
+              <form id="salesForm">
+                <input type="hidden" id="salesEditId" />
+                <div class="field">
+                  <label for="salesCustomer">Pelanggan</label>
+                  <input class="input" id="salesCustomer" placeholder="Nama pelanggan" />
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="salesItem">Pilih Item</label>
+                    <select class="select" id="salesItem"></select>
+                  </div>
+                  <div class="field">
+                    <label for="salesQty">Jumlah</label>
+                    <input class="input" id="salesQty" type="number" min="1" placeholder="0" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="salesStatus">Status</label>
+                  <select class="select" id="salesStatus">
+                    <option value="Selesai">Selesai</option>
+                    <option value="Pending">Pending</option>
+                  </select>
+                </div>
+                <div class="form-actions no-print">
+                  <button class="btn primary" type="submit" id="saveSalesBtn">Simpan Penjualan</button>
+                  <button class="btn secondary" type="button" id="cancelSalesEditBtn">Batal Edit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Catatan Sales</h3>
+                  <p>Harga jual diambil otomatis dari item yang dipilih dan dijadikan dasar revenue.</p>
+                </div>
+              </div>
+              <div id="salesInsightList"></div>
+            </div>
+          </div>
+
+          <div class="card section-gap">
+            <div class="card-header">
+              <div class="card-title">
+                <h3>Data Penjualan</h3>
+                <p>Daftar transaksi penjualan yang sudah tercatat.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="salesTable">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Pelanggan</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Status</th>
+                    <th>Harga Jual</th>
+                    <th>Total</th>
+                    <th class="no-print">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="salesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="section-purchases">
+          <div class="section-headline">
+            <div>
+              <h2 style="margin:0 0 6px">Purchases</h2>
+              <div class="muted">Catat pembelian stok baru dari supplier dan tambah stok otomatis.</div>
+            </div>
+            <div class="split-actions no-print">
+              <button class="btn success" id="exportPurchasesExcelBtn">Export Purchases Excel</button>
+              <button class="btn secondary" id="exportPurchasesPdfBtn">Export Purchases PDF</button>
+            </div>
+          </div>
+
+          <div class="grid summary-grid">
+            <div class="card stat-card">
+              <div class="stat-title">Total Transaksi</div>
+              <div class="stat-value" id="purchaseTotalTransactions">0</div>
+              <div class="kpi-note">Jumlah transaksi pembelian.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Total Biaya</div>
+              <div class="stat-value" id="purchaseTotalCost">Rp 0</div>
+              <div class="kpi-note">Total nominal pembelian.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Pembelian Selesai</div>
+              <div class="stat-value" id="purchaseDoneCount">0</div>
+              <div class="kpi-note">Status selesai.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-title">Pembelian Pending</div>
+              <div class="stat-value" id="purchasePendingCount">0</div>
+              <div class="kpi-note">Status pending.</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Form Pembelian</h3>
+                  <p>Pembelian tersimpan akan langsung menambah stok item terkait.</p>
+                </div>
+              </div>
+              <form id="purchaseForm">
+                <input type="hidden" id="purchaseEditId" />
+                <div class="field">
+                  <label for="purchaseSupplier">Supplier</label>
+                  <input class="input" id="purchaseSupplier" placeholder="Nama supplier" />
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="purchaseItem">Pilih Item</label>
+                    <select class="select" id="purchaseItem"></select>
+                  </div>
+                  <div class="field">
+                    <label for="purchaseQty">Jumlah</label>
+                    <input class="input" id="purchaseQty" type="number" min="1" placeholder="0" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="purchaseStatus">Status</label>
+                  <select class="select" id="purchaseStatus">
+                    <option value="Selesai">Selesai</option>
+                    <option value="Pending">Pending</option>
+                  </select>
+                </div>
+                <div class="form-actions no-print">
+                  <button class="btn primary" type="submit" id="savePurchaseBtn">Simpan Pembelian</button>
+                  <button class="btn secondary" type="button" id="cancelPurchaseEditBtn">Batal Edit</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3>Catatan Purchases</h3>
+                  <p>Harga modal diambil otomatis dari item yang dipilih sebagai dasar nilai pembelian.</p>
+                </div>
+              </div>
+              <div id="purchaseInsightList"></div>
+            </div>
+          </div>
+
+          <div class="card section-gap">
+            <div class="card-header">
+              <div class="card-title">
+                <h3>Data Pembelian</h3>
+                <p>Daftar transaksi pembelian yang sudah tercatat.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="purchaseTable">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Supplier</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Status</th>
+                    <th>Harga Modal</th>
+                    <th>Total</th>
+                    <th class="no-print">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="purchaseTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div class="card section-gap no-print">
+          <div class="card-header">
+            <div class="card-title">
+              <h3>Export Semua Data</h3>
+              <p>Ekspor seluruh data sistem sekaligus ke Excel atau PDF.</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn success" id="exportAllExcelBtn">Export All Excel</button>
+              <button class="btn secondary" id="exportAllPdfBtn">Export All PDF</button>
+              <button class="btn secondary" id="backupDataBtnBottom">Backup JSON</button>
+              <button class="btn secondary" id="restoreBackupBtnBottom">Restore JSON</button>
+            </div>
+          </div>
+          <p class="muted small">Export Excel menggunakan format <strong>.xls</strong> yang bisa dibuka di Microsoft Excel. Export PDF menggunakan jendela print browser sehingga bisa disimpan sebagai PDF.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <input type="file" id="restoreBackupInput" accept=".json,application/json" hidden />
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="app.js"></script>
+</body>
+</html>

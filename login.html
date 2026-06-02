@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Admin • KeyDup Inventory Pro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="login-page">
+  <main class="login-page-wrap">
+    <div class="login-card">
+      <div class="brand login-brand">
+        <div class="brand-mark">🔐</div>
+        <div>
+          <h1>Login Admin</h1>
+          <p>Masuk dulu untuk mengakses dashboard inventory duplikat kunci.</p>
+        </div>
+      </div>
+
+      <div class="login-meta">
+        <span class="pill">Username: admin</span>
+        <span class="pill">Password: admin123</span>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginUsername">Username</label>
+          <input class="input" id="loginUsername" autocomplete="username" placeholder="Masukkan username" required />
+        </div>
+        <div class="field" style="margin-top:14px">
+          <label for="loginPassword">Password</label>
+          <input class="input" id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required />
+        </div>
+        <button class="btn primary full" type="submit" style="margin-top:18px">Masuk ke Dashboard</button>
+      </form>
+
+      <p class="small login-note">
+        Status login memakai <strong>sessionStorage</strong>. Jadi halaman boleh di-refresh tanpa logout, tetapi saat logout akses dashboard akan ditutup kembali.
+      </p>
+    </div>
+  </main>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="auth.js"></script>
+</body>
+</html>
